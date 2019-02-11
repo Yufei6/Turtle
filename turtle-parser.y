@@ -41,7 +41,7 @@ cmds:
 ;
 
 cmd:
-    KW_FORWARD expr expr  { fprintf(stderr, "LineTo %f %f\n", $2->u.value, $3->u.value); }
+    KW_FORWARD expr { fprintf(stderr, "FW %f \n", $2->u.value); $$ = make_expr_fw($2->u.value); insertNode(ret, $$) ;}
 ;
 
 expr:

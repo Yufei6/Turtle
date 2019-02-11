@@ -17,6 +17,17 @@ struct ast_node *make_expr_value(double value) {
 }
 
 
+struct ast_node *make_expr_fw(double value){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_FORWARD;
+	node->children_count = 1;
+	node->children[0] = make_expr_value(value);
+	// node->next = null;
+	return node; 
+}
+
+
 
 void ast_destroy(struct ast *self) {
 	free(self);
@@ -39,7 +50,7 @@ void context_create(struct context *self) {
  */
 
 void ast_eval(const struct ast *self, struct context *ctx) {
-	// ctx->x = 1.0;
+	
 }
 
 /*
