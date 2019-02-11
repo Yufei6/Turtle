@@ -17,6 +17,12 @@ struct ast_node *make_expr_value(double value) {
 }
 
 
+void make_expr_value(ast_kind kind, struct ast_node){
+
+}
+
+
+
 void ast_destroy(struct ast *self) {
 
 }
