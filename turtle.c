@@ -10,6 +10,7 @@ int main() {
   srand(time(NULL));
 
   struct ast root;
+  root.unit = NULL;
   int ret = yyparse(&root);
 
   if (ret != 0) {

@@ -73,6 +73,8 @@ struct ast {
   struct ast_node *unit;
 };
 
+void insert_node(struct ast *root, struct ast_node *new_node);
+
 // do not forget to destroy properly! no leaks allowed!
 void ast_destroy(struct ast *self);
 

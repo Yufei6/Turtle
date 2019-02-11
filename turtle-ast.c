@@ -23,14 +23,14 @@ struct ast_node *make_expr_fw(double value){
 	node->u.cmd = CMD_FORWARD;
 	node->children_count = 1;
 	node->children[0] = make_expr_value(value);
-	// node->next = null;
+	node->next = NULL;
 	return node; 
 }
 
 
 
 void ast_destroy(struct ast *self) {
-	free(self);
+	//free(self);
 }
 
 /*
@@ -57,6 +57,40 @@ void ast_eval(const struct ast *self, struct context *ctx) {
  * print
  */
 
-void ast_print(const struct ast *self) {
+char* print_kind(enum ast_kind kind) {
+	switch(kind) {
+		case KIND_CMD_SIMPLE:
+			return "KIND_CMD_SIMPLE";
+	}
+}
 
+void ast_print(const struct ast *self) {
+	if (self != NULL) {
+		printf("[root] -> ");
+	}
+	if (self->unit == NULL) {
+		printf("...\n");
+		return;
+	}
+	struct ast_node *current_node = self->unit;
+	do {
+		printf("[Node: %s] -> ", print_kind(current_node->kind));
+		current_node = current_node->next;
+	} while (current_node != NULL);
+	printf("...\n");
+}
+
+void insert_node(struct ast *root, struct ast_node *new_node) {
+	if (root == NULL || new_node == NULL) {
+		return;
+	}
+	if (root->unit == NULL) {
+		root->unit = new_node;
+		return;
+	}
+	struct ast_node *current_node = root->unit;
+	while(current_node->next != NULL) {
+		current_node = current_node->next;
+	}
+	current_node->next = new_node;
 }
