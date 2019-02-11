@@ -41,7 +41,7 @@ cmds:
 ;
 
 cmd:
-    KW_FORWARD expr   { $$ = make_expr_value_0(KIND_CMD_SIMPLE,$2->value); }
+    KW_FORWARD expr expr  { fprintf(stderr, "LineTo %f %f\n", $2->u.value, $3->u.value); }
 ;
 
 expr:
