@@ -27,10 +27,12 @@ struct ast_node *make_expr_fw(double value){
 	return node; 
 }
 
+// struct ast_node *make_
+
 
 
 void ast_destroy(struct ast *self) {
-	//free(self);
+	// free(self);
 }
 
 /*
@@ -50,7 +52,17 @@ void context_create(struct context *self) {
  */
 
 void ast_eval(const struct ast *self, struct context *ctx) {
-	
+	struct ast_node *node = self->unit;
+	while(node != NULL){
+		if(node->kind==KIND_CMD_SIMPLE){
+			if(node->u.cmd==CMD_FORWARD){
+				ctx->y+=node->children[0]->u.value*cos(ctx->angle/(2*PI));
+				ctx->x+=node->children[0]->u.value*sin(ctx->angle/(2*PI));
+				printf("LineTo %f %f\n",ctx->x,ctx->y);
+			}
+		}
+		node=node->next;
+	}
 }
 
 /*
@@ -61,23 +73,26 @@ char* print_kind(enum ast_kind kind) {
 	switch(kind) {
 		case KIND_CMD_SIMPLE:
 			return "KIND_CMD_SIMPLE";
+			break;
+		default:
+			return "INKNOW STILL";
 	}
 }
 
 void ast_print(const struct ast *self) {
-	if (self != NULL) {
-		printf("[root] -> ");
-	}
-	if (self->unit == NULL) {
-		printf("...\n");
-		return;
-	}
-	struct ast_node *current_node = self->unit;
-	do {
-		printf("[Node: %s] -> ", print_kind(current_node->kind));
-		current_node = current_node->next;
-	} while (current_node != NULL);
-	printf("...\n");
+	// if (self != NULL) {
+	// 	printf("[root] -> ");
+	// }
+	// if (self->unit == NULL) {
+	// 	printf("...\n");
+	// 	return;
+	// }
+	// struct ast_node *current_node = self->unit;
+	// do {
+	// 	printf("[Node: %s] -> ", print_kind(current_node->kind));
+	// 	current_node = current_node->next;
+	// } while (current_node != NULL);
+	// printf("...\n");
 }
 
 void insert_node(struct ast *root, struct ast_node *new_node) {
