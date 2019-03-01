@@ -42,7 +42,7 @@ cmds:
 ;
 
 cmd:
-    KW_FORWARD expr { fprintf(stderr, "FW %f \n", $2->u.value); $$ = make_expr_fw($2->u.value); insert_node(ret, $$) ;}
+    KW_FORWARD expr { fprintf(stderr, "FW %f \n", $2->u.value); $$ = make_cmd_forward($2); insert_node(ret, $$) ;}
     |QUIT { fprintf(stderr, "byebye"); }
 ;
 
