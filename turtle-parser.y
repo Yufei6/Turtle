@@ -25,6 +25,7 @@ void yyerror(struct ast *ret, const char *);
 %token <name>     NAME        "name"
 
 %token            KW_FORWARD  "forward"
+%token            KW_RIGHT  "right"
 %token		  QUIT	"quit"
 /* TODO: add other tokens */
 
@@ -42,7 +43,9 @@ cmds:
 ;
 
 cmd:
-    KW_FORWARD expr { fprintf(stderr, "FW %f \n", $2->u.value); $$ = make_cmd_forward($2); insert_node(ret, $$) ;}
+    KW_FORWARD expr { $$ = make_cmd_forward($2); insert_node(ret, $$) ;}
+    |KW_RIGHT expr { $$ = make_cmd_right($2);
+    insert_node(ret, $$) ;}
     |QUIT { fprintf(stderr, "byebye"); }
 ;
 

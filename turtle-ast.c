@@ -28,6 +28,16 @@ struct ast_node *make_cmd_forward(struct ast_node *expr) {
 }
 
 
+struct ast_node *make_cmd_right(struct ast_node *expr) {
+  struct ast_node *node = calloc(1, sizeof(struct ast_node));
+  node->kind = KIND_CMD_SIMPLE;
+  node->u.cmd = CMD_RIGHT;
+  node->children_count = 1;
+  node->children[0] = expr;
+  return node;
+}
+
+
 
 void ast_destroy(struct ast *self) {
 	// free(self);
@@ -53,10 +63,17 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 	struct ast_node *node = self->unit;
 	while(node != NULL){
 		if(node->kind==KIND_CMD_SIMPLE){
-			if(node->u.cmd==CMD_FORWARD){
-				ctx->y+=node->children[0]->u.value*cos(ctx->angle/(2*PI));
-				ctx->x+=node->children[0]->u.value*sin(ctx->angle/(2*PI));
-				printf("LineTo %f %f\n",ctx->x,ctx->y);
+			switch(node->u.cmd){
+				case(CMD_FORWARD):
+					ctx->y+=node->children[0]->u.value*cos(ctx->angle);
+					ctx->x+=node->children[0]->u.value*sin(ctx->angle);
+					printf("LineTo %f %f\n",ctx->x,ctx->y);
+					break;
+				case(CMD_RIGHT):
+					ctx->angle+=(node->children[0]->u.value/180)*PI;
+					break;
+				default:
+					break;
 			}
 		}
 		node=node->next;

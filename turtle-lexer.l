@@ -14,7 +14,8 @@ DIGIT [A-Z0-9]
 %%
 
 -?{DIGIT}+              { yylval.value = strtod(yytext, NULL); return VALUE; }
-forward|fw            { printf("I see forward: %s\n", yytext); return KW_FORWARD; }
+forward|fw            { return KW_FORWARD; }
+right|rt              { return KW_RIGHT; }
 [\n\t ]*              /* whitespace */
 quit { return QUIT; }
 .                     { fprintf(stderr, "Unknown token: '%s'\n", yytext); exit(EXIT_FAILURE); }
