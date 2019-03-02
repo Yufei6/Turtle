@@ -25,6 +25,7 @@ down				  { return KW_DOWN; }
 print				  { return KW_PRINT; }
 red|green|blue|black|gray|cyan|yellow|magenta    { printf("I know this is color: %s\n", yytext); yylval.name = yytext; return NAME; }
 color                 { return KW_COLOR; }
+repeat                { return KW_REPEAT; }
 [\n\t ]*              /* whitespace */
 quit { return QUIT; }
 .                     { fprintf(stderr, "Unknown token: '%s'\n", yytext); exit(EXIT_FAILURE); }
