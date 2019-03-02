@@ -65,7 +65,7 @@ cmd:
 ;
 
 expr:
-    VALUE             {printf("HEY VALUE:%f\n",$1); $$ = make_expr_value($1); }
+    VALUE             { $$ = make_expr_value($1); }
     |NAME              {printf("HEY NAME:%s\n",$1); $$ = make_expr_name($1); }
 ;
 
