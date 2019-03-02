@@ -16,31 +16,115 @@ struct ast_node *make_expr_value(double value) {
 	return node;
 }
 
+struct ast_node *make_expr_name(const char* name) {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_NAME;
+	node->u.name = name;
+	return node;
+}
+
 
 
 struct ast_node *make_cmd_forward(struct ast_node *expr) {
-  struct ast_node *node = calloc(1, sizeof(struct ast_node));
-  node->kind = KIND_CMD_SIMPLE;
-  node->u.cmd = CMD_FORWARD;
-  node->children_count = 1;
-  node->children[0] = expr;
-  return node;
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_FORWARD;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
+}
+
+struct ast_node *make_cmd_backward(struct ast_node *expr) {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_BACKWARD;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
+}
+
+
+struct ast_node *make_cmd_position(struct ast_node *x, struct ast_node *y){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_POSITION;
+	node->children_count = 2;
+	node->children[0] = x;
+	node->children[1] = y;
+	return node;
 }
 
 
 struct ast_node *make_cmd_right(struct ast_node *expr) {
-  struct ast_node *node = calloc(1, sizeof(struct ast_node));
-  node->kind = KIND_CMD_SIMPLE;
-  node->u.cmd = CMD_RIGHT;
-  node->children_count = 1;
-  node->children[0] = expr;
-  return node;
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_RIGHT;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
+}
+
+struct ast_node *make_cmd_left(struct ast_node *expr) {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_LEFT;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
+}
+
+struct ast_node *make_cmd_heading(struct ast_node *expr) {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_HEADING;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
+}
+
+struct ast_node *make_cmd_up() {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_UP;
+	node->children_count = 0;
+	return node;
+}
+
+struct ast_node *make_cmd_down() {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_DOWN;
+	node->children_count = 0;
+	return node;
+}
+
+struct ast_node *make_cmd_print(struct ast_node *expr) {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_PRINT;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
 }
 
 
+struct ast_node *make_cmd_color(struct ast_node *expr) {
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SIMPLE;
+	node->u.cmd = CMD_COLOR;
+	node->children_count = 1;
+	node->children[0] = expr;
+	return node;
+}
+
 
 void ast_destroy(struct ast *self) {
-	// free(self);
+	while(self->unit!=NULL){
+		struct ast_node *temp = self->unit->next;
+		free(self->unit);
+		self->unit = temp;
+	}
+	free(self);
 }
 
 /*
@@ -65,13 +149,74 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 		if(node->kind==KIND_CMD_SIMPLE){
 			switch(node->u.cmd){
 				case(CMD_FORWARD):
-					ctx->y+=node->children[0]->u.value*cos(ctx->angle);
-					ctx->x+=node->children[0]->u.value*sin(ctx->angle);
+					ctx->x += node->children[0]->u.value*sin(ctx->angle);
+					ctx->y -= node->children[0]->u.value*cos(ctx->angle);
 					printf("LineTo %f %f\n",ctx->x,ctx->y);
 					break;
-				case(CMD_RIGHT):
-					ctx->angle+=(node->children[0]->u.value/180)*PI;
+
+				case(CMD_BACKWARD):
+					ctx->x -= node->children[0]->u.value*sin(ctx->angle);
+					ctx->y += node->children[0]->u.value*cos(ctx->angle);
+					printf("LineTo %f %f\n",ctx->x,ctx->y);
 					break;
+
+				case(CMD_POSITION):
+					ctx->x = node->children[0]->u.value;
+					ctx->y = node->children[1]->u.value;
+					printf("MoveTo %f %f\n",ctx->x,ctx->y);
+					break;
+
+				case(CMD_RIGHT):
+					ctx->angle += (node->children[0]->u.value/180)*PI;
+					break;
+
+				case(CMD_LEFT):
+					ctx->angle -= (node->children[0]->u.value/180)*PI;
+					break;
+
+				case(CMD_HEADING):
+					ctx->angle = (node->children[0]->u.value/180)*PI;
+					break;
+
+				case(CMD_UP):
+					ctx->up = true;
+					break;
+
+				case(CMD_DOWN):
+					ctx->up = false;
+					break;
+
+				case(CMD_PRINT):
+
+					break;
+
+				case(CMD_COLOR):
+					if(strcmp(node->children[0]->u.name,"red")==0){
+						printf("Color 1.000000 0.000000 0.000000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"green")==0){
+						printf("Color 0.000000 1.000000 0.000000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"blue")==0){
+						printf("Color 0.000000 0.000000 1.000000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"black")==0){
+						printf("Color 0.000000 0.000000 0.000000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"gray")==0){
+						printf("Color 0.500000 0.500000 0.500000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"cyan")==0){
+						printf("Color 0.000000 1.000000 1.000000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"yellow")==0){
+						printf("Color 1.000000 0.000000 1.000000\n");
+					}
+					if(strcmp(node->children[0]->u.name,"magenta")==0){
+						printf("Color 1.000000 1.000000 0.000000\n");
+					}
+					break;
+
 				default:
 					break;
 			}
