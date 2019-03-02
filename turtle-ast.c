@@ -7,7 +7,9 @@
 #include <string.h>
 #include <math.h>
 
-#define PI 3.141592653589793
+#define PI 3.14159265358979323846
+#define SQRT2 1.41421356237309504880
+#define SQRT3 1.7320508075688772935
 
 struct ast_node *make_expr_value(double value) {
 	struct ast_node *node = calloc(1, sizeof(struct ast_node));
@@ -23,6 +25,17 @@ struct ast_node *make_expr_name(const char* name) {
 	node->children_count = 0;
 	return node;
 }
+
+struct ast_node *make_expr_operateur(const char op, struct ast_node *left, struct ast_node *right){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_BINOP;
+	node->u.op = op;
+	node->children_count = 2;
+	node->children[0]=left;
+	node->children[1]=right;
+	return node;
+}
+
 
 
 
@@ -109,12 +122,14 @@ struct ast_node *make_cmd_print(struct ast_node *expr) {
 }
 
 
-struct ast_node *make_cmd_color(struct ast_node *expr) {
+struct ast_node *make_cmd_color(struct ast_node *expr1, struct ast_node *expr2, struct ast_node *expr3) {
 	struct ast_node *node = calloc(1, sizeof(struct ast_node));
 	node->kind = KIND_CMD_SIMPLE;
 	node->u.cmd = CMD_COLOR;
-	node->children_count = 1;
-	node->children[0] = expr;
+	node->children_count = 3;
+	node->children[0] = expr1;
+	node->children[1] = expr2;
+	node->children[2] = expr3;
 	return node;
 }
 
@@ -126,6 +141,31 @@ struct ast_node *make_cmd_repeat(struct ast_node *number, struct ast_node *cmd){
 	node->children[1]=cmd;
 	return node;
 }
+
+
+struct ast_node *make_cmd_block(struct ast_node *cmds_in_block){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_BLOCK;
+	int nb=0;
+	while(cmds_in_block!=NULL){
+		node->children[nb]=cmds_in_block;
+		nb++;
+		cmds_in_block=cmds_in_block->next;
+	}
+	node->children_count = nb;
+	return node;
+}
+
+struct ast_node *make_cmd_set(struct ast_node *name, struct ast_node *expr){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_SET;
+	node->children_count = 2;
+	node->children[0]=name;
+	node->children[1]=expr;
+	return node;
+}
+
+
 
 
 
@@ -156,7 +196,7 @@ void context_create(struct context *self) {
 
 void ast_eval(const struct ast *self, struct context *ctx) {
 	struct ast_node *node = self->unit;
-	int nb=0;
+	int nb=0, nb2=0;
 
 	while(node != NULL){
 		switch(node->kind){
@@ -166,9 +206,34 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 
 			case KIND_CMD_REPEAT:
 				nb = floor(node->children[0]->u.value);
-				for(int i =0; i<nb; i++){
-					ast_cmd_eval(node->children[1],ctx);
+				if(node->children[1]->kind==KIND_CMD_SIMPLE){
+					for(int i =0; i<nb; i++){
+						ast_cmd_eval(node->children[1],ctx);
+					}
 				}
+				else if(node->children[1]->kind==KIND_CMD_BLOCK){
+					nb2 = node->children[1]->children_count;
+					for(int i=0; i<nb; i++){
+						for(int j=0; j<nb2; j++){
+							ast_cmd_eval(node->children[1]->children[j],ctx);
+						}
+					}
+				}
+			break;
+
+			case KIND_CMD_BLOCK:
+				nb = node->children_count;
+				for(int i=0; i<nb; i++){
+					ast_cmd_eval(node->children[i],ctx);
+				}
+			break;
+
+			case KIND_EXPR_BINOP:
+				ast_binop_eval(node);
+			break;
+
+			case  KIND_EXPR_NAME:
+				
 			break;
 
 			default:
@@ -179,19 +244,43 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 	}
 }
 
+void ast_binop_eval(struct ast_node *node){
+	switch(node->u.op){
+		case '+':
+			node->u.value=node->children[0]->u.value + node->children[1]->u.value;
+		break;
+		case '-':
+			node->u.value=node->children[0]->u.value - node->children[1]->u.value;
+		break;
+		case '*':
+			node->u.value=node->children[0]->u.value * node->children[1]->u.value;
+		break;
+		case '/':
+			node->u.value=node->children[0]->u.value / node->children[1]->u.value;
+		break;
+		case '^':
+			node->u.value=pow(node->children[0]->u.value,node->children[1]->u.value);
+		break;
+		default:
+			printf("I WORK FOR NOTHING\n");
+		break;
+	}
+}
+
 void ast_cmd_eval(struct ast_node *node, struct context *ctx){
-	char str1[100];
-	char *ptr;
 	switch(node->u.cmd){
 		case(CMD_FORWARD):
-			ctx->x += node->children[0]->u.value*sin(ctx->angle);
-			ctx->y -= node->children[0]->u.value*cos(ctx->angle);
+			if(node->children[0]->kind==KIND_EXPR_BINOP){
+				ast_binop_eval(node->children[0]);
+			}
+			ctx->x += node->children[0]->u.value*sin(ctx->angle*PI/180);
+			ctx->y -= node->children[0]->u.value*cos(ctx->angle*PI/180);
 			printf("LineTo %f %f\n",ctx->x,ctx->y);
 			break;
 
 		case(CMD_BACKWARD):
-			ctx->x -= node->children[0]->u.value*sin(ctx->angle);
-			ctx->y += node->children[0]->u.value*cos(ctx->angle);
+			ctx->x -= node->children[0]->u.value*sin(ctx->angle*PI/180);
+			ctx->y += node->children[0]->u.value*cos(ctx->angle*PI/180);
 			printf("LineTo %f %f\n",ctx->x,ctx->y);
 			break;
 
@@ -202,15 +291,15 @@ void ast_cmd_eval(struct ast_node *node, struct context *ctx){
 			break;
 
 		case(CMD_RIGHT):
-			ctx->angle += (node->children[0]->u.value/180)*PI;
+			ctx->angle += (node->children[0]->u.value);
 			break;
 
 		case(CMD_LEFT):
-			ctx->angle -= (node->children[0]->u.value/180)*PI;
+			ctx->angle -= (node->children[0]->u.value);
 			break;
 
 		case(CMD_HEADING):
-			ctx->angle = (node->children[0]->u.value/180)*PI;
+			ctx->angle = (node->children[0]->u.value);
 			break;
 
 		case(CMD_UP):
@@ -225,36 +314,7 @@ void ast_cmd_eval(struct ast_node *node, struct context *ctx){
 			break;
 
 		case(CMD_COLOR):
-			// printf("COLOR TEST %s\n", node->children[0]->u.name);
-			strcpy(str1, node->children[0]->u.name);
-			ptr = strtok(str1, "\n");
-			// printf("TEST COLOR %s\n", str1);
-			if((strcmp(ptr,"red")==0)){
-				printf("Color 1.000000 0.000000 0.000000\n");
-			}
-			else if(strcmp(ptr,"green")==0){
-				printf("Color 0.000000 1.000000 0.000000\n");
-			}
-			else if(strcmp(ptr,"blue")==0){
-				printf("Color 0.000000 0.000000 1.000000\n");
-			}
-			else if(strcmp(ptr,"black")==0){
-				printf("Color 0.000000 0.000000 0.000000\n");
-			}
-			else if(strcmp(ptr,"gray")==0){
-				printf("Color 0.500000 0.500000 0.500000\n");
-			}
-			else if(strcmp(ptr,"cyan")==0){
-				printf("Color 0.000000 1.000000 1.000000\n");
-			}
-			else if(strcmp(ptr,"yellow")==0){
-				printf("Color 1.000000 0.000000 1.000000\n");
-			}
-			else if(strcmp(ptr,"magenta")==0){
-				printf("Color 1.000000 1.000000 0.000000\n");
-			}
-			break;
-
+			printf("Color %f %f %f\n",node->children[0]->u.value,node->children[1]->u.value,node->children[2]->u.value);
 		default:
 		break;
 	}

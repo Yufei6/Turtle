@@ -18,15 +18,24 @@ void yyerror(struct ast *ret, const char *);
 %union {
   double value;
   const char *name;
-  char *strval;
   struct ast_node *node;
 }
 
 %token <value>    VALUE       "value"
-%token <name>     NAME        "name"
-%token <strval>   IDENTITY      "strval"
+%token <name>   NAME      "name"
+%token <name>   OPERATEUR     "op"
 
 
+%token      RED     
+%token      GREEN 
+%token      BLUE 
+%token      BLACK 
+%token      GRAY 
+%token      CYAN 
+%token      YELLOW 
+%token      MAGENTA 
+
+%token      KW_SET     "set"
 %token      KW_FORWARD  "forward"
 %token      KW_BACKWARD  "backward"
 %token      KW_POSITION  "position"
@@ -38,8 +47,14 @@ void yyerror(struct ast *ret, const char *);
 %token      KW_PRINT  "print"
 %token      KW_COLOR  "color"
 %token      KW_REPEAT  "repeat"
+%token      LP          "lp"
+%token      RP          "rp"
 %token		  QUIT	"quit"
 /* TODO: add other tokens */
+
+%left '+' '-'
+%left '*' '/'
+%left '^'
 
 %type <node> unit cmds cmd expr
 
@@ -66,15 +81,33 @@ cmd:
     |KW_UP {$$ = make_cmd_up(); insert_node(ret, $$);}
     |KW_DOWN {$$ = make_cmd_down(); insert_node(ret, $$);}
     |KW_PRINT expr{$$ = make_cmd_print($2); insert_node(ret,$$);}
-    |KW_COLOR expr{$$ = make_cmd_color($2); insert_node(ret,$$);}
-    |KW_REPEAT expr expr{$$ = make_cmd_repeat($2,$3); insert_node(ret,$$);}
+    |KW_SET NAME expr{$$ = make_cmd_set(make_expr_name($2),$3); insert_node(ret,$$);}
+    |KW_COLOR RED{$$ = make_cmd_color(make_expr_value(1),make_expr_value(0),make_expr_value(0)); insert_node(ret,$$);}
+    |KW_COLOR GREEN{$$ = make_cmd_color(make_expr_value(0),make_expr_value(1),make_expr_value(0)); insert_node(ret,$$);}
+    |KW_COLOR BLUE{$$ = make_cmd_color(make_expr_value(0),make_expr_value(0),make_expr_value(1)); insert_node(ret,$$);}
+    |KW_COLOR BLACK{$$ = make_cmd_color(make_expr_value(0),make_expr_value(0),make_expr_value(0)); insert_node(ret,$$);}
+    |KW_COLOR GRAY{$$ = make_cmd_color(make_expr_value(0.5),make_expr_value(0.5),make_expr_value(0.5)); insert_node(ret,$$);}
+    |KW_COLOR CYAN{$$ = make_cmd_color(make_expr_value(0),make_expr_value(1),make_expr_value(1)); insert_node(ret,$$);}
+    |KW_COLOR YELLOW{$$ = make_cmd_color(make_expr_value(1),make_expr_value(0),make_expr_value(1)); insert_node(ret,$$);}
+    |KW_COLOR MAGENTA{$$ = make_cmd_color(make_expr_value(1),make_expr_value(1),make_expr_value(0)); insert_node(ret,$$);}
+
+    |KW_REPEAT expr cmd{$$ = make_cmd_repeat($2,$3); insert_node(ret,$$);}
+    |LP cmds RP{$$ = make_cmd_block($2); insert_node(ret,$$);}
     |QUIT { fprintf(stderr, "byebye"); }
 ;
 
 expr:
     VALUE             { $$ = make_expr_value($1); }
-    |NAME              { $$ = make_expr_name($1); }
+  | NAME              { $$ = make_expr_name($1); }
+  | expr '+' expr { $$ = make_expr_operateur('+',$1,$3); }
+  | expr '-' expr { $$ = make_expr_operateur('-',$1,$3); }
+  | expr '*' expr { $$ = make_expr_operateur('*',$1,$3); }
+  | expr '/' expr { $$ = make_expr_operateur('/',$1,$3); }
+  | expr '^' expr { $$ = make_expr_operateur('^',$1,$3); }
+  
 ;
+
+  
 
 %%
 

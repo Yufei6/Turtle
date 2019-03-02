@@ -13,8 +13,16 @@ DIGIT [A-Z0-9]
 
 %%
 
-[A-Z][A-Z0-9]*       { yylval.strval = strdup(yytext); return IDENTITY; }
--?{DIGIT}+              { yylval.value = strtod(yytext, NULL); return VALUE; }
+"#".*                 {}
+[A-Z][A-Z0-9]*        { return NAME; }
+set 				  { return KW_SET; }
+"+"					  { return '+'; }
+"-"					  { return '-'; }
+"*"					  { return '*'; }
+"/"				  	  { return '/'; }
+"^"			  		  { return '^'; }
+-?{DIGIT}+            { yylval.value = strtod(yytext, NULL); return VALUE; }
+-?[0-9]*[[0-9]+e[0-9]*[[\.[0-9]+e[0-9]*]?|[\.[0-9]+]?]|[[\.[0-9]+e[0-9]*]?|[\.[0-9]+]?] { yylval.value = atof(yytext); return VALUE; }
 forward|fw            { return KW_FORWARD; }
 backward|bw			  { return KW_BACKWARD; }
 position|pos          { return KW_POSITION; }
@@ -24,8 +32,17 @@ heading|hd           { return KW_HEADING; }
 up					  { return KW_UP; }
 down				  { return KW_DOWN; }
 print				  { return KW_PRINT; }
-red|green|blue|black|gray|cyan|yellow|magenta    { yylval.name = yytext; return NAME; }
 color                 { return KW_COLOR; }
+red					  { return RED; }
+green                 { return GREEN; }
+blue				  { return BLUE; }
+black                 { return BLACK; }
+gray				  { return GRAY; }
+cyan				  { return CYAN; }
+yellow                { return YELLOW; }
+magenta				  { return MAGENTA; }
+"{"			  		  { return LP; }
+"}"					  { return RP; }
 repeat                { return KW_REPEAT; }
 [\n\t ]*              /* whitespace */
 quit { return QUIT; }

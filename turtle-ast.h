@@ -67,6 +67,7 @@ struct ast_node {
 // for example:
 struct ast_node *make_expr_value(double value);
 struct ast_node *make_expr_name(const char *name);
+struct ast_node *make_expr_operateur(const char op, struct ast_node *left, struct ast_node *right);
 struct ast_node *make_cmd_forward(struct ast_node *expr);
 struct ast_node *make_cmd_backward(struct ast_node *expr);
 struct ast_node *make_cmd_position(struct ast_node *x, struct ast_node *y);
@@ -76,8 +77,10 @@ struct ast_node *make_cmd_heading(struct ast_node *expr);
 struct ast_node *make_cmd_up();
 struct ast_node *make_cmd_down();
 struct ast_node *make_cmd_print(struct ast_node *expr);
-struct ast_node *make_cmd_color(struct ast_node *expr);
+struct ast_node *make_cmd_color(struct ast_node *expr1,struct ast_node *expr2,struct ast_node *expr3);
 struct ast_node *make_cmd_repeat(struct ast_node *number, struct ast_node *cmd);
+struct ast_node *make_cmd_block(struct ast_node *cmds_in_block);
+struct ast_node *make_cmd_set(struct ast_node *name, struct ast_node *expr);
 
 
 
@@ -111,6 +114,6 @@ void ast_print(const struct ast *self);
 // evaluate the tree and generate some basic primitives
 void ast_eval(const struct ast *self, struct context *ctx);
 void ast_cmd_eval(struct ast_node *node, struct context *ctx);
-
+void ast_binop_eval(struct ast_node *node);
 
 #endif /* TURTLE_AST_H */
