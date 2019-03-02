@@ -119,6 +119,16 @@ struct ast_node *make_cmd_color(struct ast_node *expr) {
 	return node;
 }
 
+struct ast_node *make_cmd_repeat(struct ast_node *number, struct ast_node *cmd){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_CMD_REPEAT;
+	node->children_count = 2;
+	node->children[0]=number;
+	node->children[1]=cmd;
+	return node;
+}
+
+
 
 void ast_destroy(struct ast *self) {
 	// while(self->unit!=NULL){

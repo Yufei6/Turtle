@@ -77,6 +77,7 @@ struct ast_node *make_cmd_up();
 struct ast_node *make_cmd_down();
 struct ast_node *make_cmd_print(struct ast_node *expr);
 struct ast_node *make_cmd_color(struct ast_node *expr);
+struct ast_node *make_cmd_repeat(struct ast_node *number, struct ast_node *cmd);
 
 
 

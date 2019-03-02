@@ -34,6 +34,7 @@ void yyerror(struct ast *ret, const char *);
 %token      KW_DOWN  "down"
 %token      KW_PRINT  "print"
 %token      KW_COLOR  "color"
+%token      KW_REPEAT  "repeat"
 %token		  QUIT	"quit"
 /* TODO: add other tokens */
 
@@ -61,6 +62,7 @@ cmd:
     |KW_DOWN {$$ = make_cmd_down(); insert_node(ret, $$);}
     |KW_PRINT expr{$$ = make_cmd_print($2); insert_node(ret,$$);}
     |KW_COLOR expr{$$ = make_cmd_color($2); insert_node(ret,$$);}
+    |KW_REPEAT expr expr{$$ = make_cmd_repeat($2,$3); insert_node(ret,$$);}
     |QUIT { fprintf(stderr, "byebye"); }
 ;
 
