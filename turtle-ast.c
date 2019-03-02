@@ -19,6 +19,7 @@ struct ast_node *make_expr_value(double value) {
 struct ast_node *make_expr_name(const char* name) {
 	struct ast_node *node = calloc(1, sizeof(struct ast_node));
 	node->kind = KIND_EXPR_NAME;
+	printf("IM CREATING NAME: %s\n", name);
 	node->u.name = name;
 	return node;
 }
@@ -119,12 +120,12 @@ struct ast_node *make_cmd_color(struct ast_node *expr) {
 
 
 void ast_destroy(struct ast *self) {
-	while(self->unit!=NULL){
-		struct ast_node *temp = self->unit->next;
-		free(self->unit);
-		self->unit = temp;
-	}
-	free(self);
+	// while(self->unit!=NULL){
+	// 	struct ast_node *temp = self->unit->next;
+	// 	free(self->unit);
+	// 	self->unit = temp;
+	// }
+	// free(self);
 }
 
 /*
@@ -145,6 +146,8 @@ void context_create(struct context *self) {
 
 void ast_eval(const struct ast *self, struct context *ctx) {
 	struct ast_node *node = self->unit;
+	char str1[100];
+
 	while(node != NULL){
 		if(node->kind==KIND_CMD_SIMPLE){
 			switch(node->u.cmd){
@@ -191,29 +194,35 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 					break;
 
 				case(CMD_COLOR):
-					if(strcmp(node->children[0]->u.name,"red")==0){
+					// printf("COLOR TEST %s\n", node->children[0]->u.name);
+					strcpy(str1, node->children[0]->u.name);
+					printf("TEST COLOR %s\n", str1);
+					if((strcmp(str1,"red")==0)){
 						printf("Color 1.000000 0.000000 0.000000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"green")==0){
+					else if(strcmp(node->children[0]->u.name,"green")==0){
 						printf("Color 0.000000 1.000000 0.000000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"blue")==0){
+					else if(strcmp(node->children[0]->u.name,"blue")==0){
 						printf("Color 0.000000 0.000000 1.000000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"black")==0){
+					else if(strcmp(node->children[0]->u.name,"black")==0){
 						printf("Color 0.000000 0.000000 0.000000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"gray")==0){
+					else if(strcmp(node->children[0]->u.name,"gray")==0){
 						printf("Color 0.500000 0.500000 0.500000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"cyan")==0){
+					else if(strcmp(node->children[0]->u.name,"cyan")==0){
 						printf("Color 0.000000 1.000000 1.000000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"yellow")==0){
+					else if(strcmp(node->children[0]->u.name,"yellow")==0){
 						printf("Color 1.000000 0.000000 1.000000\n");
 					}
-					if(strcmp(node->children[0]->u.name,"magenta")==0){
+					else if(strcmp(node->children[0]->u.name,"magenta")==0){
 						printf("Color 1.000000 1.000000 0.000000\n");
+					}
+					else{
+						printf("RED FAIL because:%s \n", node->children[0]->u.name);
 					}
 					break;
 
@@ -239,20 +248,58 @@ char* print_kind(enum ast_kind kind) {
 	}
 }
 
+char* print_kind_cmd(enum ast_cmd kind_cmd){
+	switch(kind_cmd){
+		case CMD_UP:
+			return "CMD_UP";
+			break;
+		case CMD_DOWN:
+			return "CMD_DOWN";
+			break;
+		case CMD_RIGHT:
+			return "CMD_RIGHT";
+			break;
+		case CMD_LEFT:
+			return "CMD_LEFT";
+			break;
+		case CMD_HEADING:
+			return "CMD_HEADING";
+			break;
+		case CMD_FORWARD:
+			return "CMD_FORWARD";
+			break;
+		case CMD_BACKWARD:
+			return "CMD_BACKWARD";
+			break;
+		case CMD_POSITION:
+			return "CMD_POSITION";
+			break;
+		case CMD_HOME:
+			return "CMD_HOME";
+			break;
+		case CMD_COLOR:
+			return "CMD_COLOR";
+			break;
+		case CMD_PRINT:
+			return "CMD_PRINT";
+			break;
+	}
+}
+
 void ast_print(const struct ast *self) {
-	// if (self != NULL) {
-	// 	printf("[root] -> ");
-	// }
-	// if (self->unit == NULL) {
-	// 	printf("...\n");
-	// 	return;
-	// }
-	// struct ast_node *current_node = self->unit;
-	// do {
-	// 	printf("[Node: %s] -> ", print_kind(current_node->kind));
-	// 	current_node = current_node->next;
-	// } while (current_node != NULL);
-	// printf("...\n");
+	if (self != NULL) {
+		printf("[root] -> ");
+	}
+	if (self->unit == NULL) {
+		printf("...\n");
+		return;
+	}
+	struct ast_node *current_node = self->unit;
+	do {
+		printf("[Node: %s & %s] -> ", print_kind(current_node->kind), print_kind_cmd(current_node->u.cmd));
+		current_node = current_node->next;
+	} while (current_node != NULL);
+	printf("...\n");
 }
 
 void insert_node(struct ast *root, struct ast_node *new_node) {
