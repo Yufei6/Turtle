@@ -73,7 +73,7 @@ cmd:
 
 expr:
     VALUE             { $$ = make_expr_value($1); }
-    |NAME              {printf("HEY NAME:%s\n",$1); $$ = make_expr_name($1); }
+    |NAME              { $$ = make_expr_name($1); }
 ;
 
 %%

@@ -19,7 +19,6 @@ struct ast_node *make_expr_value(double value) {
 struct ast_node *make_expr_name(const char* name) {
 	struct ast_node *node = calloc(1, sizeof(struct ast_node));
 	node->kind = KIND_EXPR_NAME;
-	printf("IM CREATING NAME: %s, Long is: %lu\n", name, strlen(name));
 	node->u.name = name;
 	node->children_count = 0;
 	return node;
@@ -182,6 +181,7 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 
 void ast_cmd_eval(struct ast_node *node, struct context *ctx){
 	char str1[100];
+	char *ptr;
 	switch(node->u.cmd){
 		case(CMD_FORWARD):
 			ctx->x += node->children[0]->u.value*sin(ctx->angle);
@@ -227,34 +227,31 @@ void ast_cmd_eval(struct ast_node *node, struct context *ctx){
 		case(CMD_COLOR):
 			// printf("COLOR TEST %s\n", node->children[0]->u.name);
 			strcpy(str1, node->children[0]->u.name);
+			ptr = strtok(str1, "\n");
 			// printf("TEST COLOR %s\n", str1);
-			if((strcmp(str1,"red")==0)){
+			if((strcmp(ptr,"red")==0)){
 				printf("Color 1.000000 0.000000 0.000000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"green")==0){
+			else if(strcmp(ptr,"green")==0){
 				printf("Color 0.000000 1.000000 0.000000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"blue")==0){
+			else if(strcmp(ptr,"blue")==0){
 				printf("Color 0.000000 0.000000 1.000000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"black")==0){
+			else if(strcmp(ptr,"black")==0){
 				printf("Color 0.000000 0.000000 0.000000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"gray")==0){
+			else if(strcmp(ptr,"gray")==0){
 				printf("Color 0.500000 0.500000 0.500000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"cyan")==0){
+			else if(strcmp(ptr,"cyan")==0){
 				printf("Color 0.000000 1.000000 1.000000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"yellow")==0){
+			else if(strcmp(ptr,"yellow")==0){
 				printf("Color 1.000000 0.000000 1.000000\n");
 			}
-			else if(strcmp(node->children[0]->u.name,"magenta")==0){
+			else if(strcmp(ptr,"magenta")==0){
 				printf("Color 1.000000 1.000000 0.000000\n");
-			}
-			else{
-				printf("Long: %lu\n", strlen(node->children[0]->u.name));
-				printf("RED FAIL because:%s \n", node->children[0]->u.name);
 			}
 			break;
 

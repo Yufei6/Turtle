@@ -24,7 +24,7 @@ heading|hd           { return KW_HEADING; }
 up					  { return KW_UP; }
 down				  { return KW_DOWN; }
 print				  { return KW_PRINT; }
-red|green|blue|black|gray|cyan|yellow|magenta    { printf("I know this is color: %s\n", yytext); yylval.name = yytext; return NAME; }
+red|green|blue|black|gray|cyan|yellow|magenta    { yylval.name = yytext; return NAME; }
 color                 { return KW_COLOR; }
 repeat                { return KW_REPEAT; }
 [\n\t ]*              /* whitespace */
