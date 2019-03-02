@@ -18,11 +18,14 @@ void yyerror(struct ast *ret, const char *);
 %union {
   double value;
   const char *name;
+  char *strval;
   struct ast_node *node;
 }
 
 %token <value>    VALUE       "value"
 %token <name>     NAME        "name"
+%token <strval>   IDENTITY      "strval"
+
 
 %token      KW_FORWARD  "forward"
 %token      KW_BACKWARD  "backward"
@@ -41,6 +44,8 @@ void yyerror(struct ast *ret, const char *);
 %type <node> unit cmds cmd expr
 
 %%
+
+
 
 unit:
     cmds              { $$ = $1; ret->unit = $$; }

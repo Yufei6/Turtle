@@ -13,6 +13,7 @@ DIGIT [A-Z0-9]
 
 %%
 
+[A-Z][A-Z0-9]*       { yylval.strval = strdup(yytext); return IDENTITY; }
 -?{DIGIT}+              { yylval.value = strtod(yytext, NULL); return VALUE; }
 forward|fw            { return KW_FORWARD; }
 backward|bw			  { return KW_BACKWARD; }

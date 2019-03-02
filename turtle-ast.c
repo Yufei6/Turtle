@@ -157,94 +157,115 @@ void context_create(struct context *self) {
 
 void ast_eval(const struct ast *self, struct context *ctx) {
 	struct ast_node *node = self->unit;
-	char str1[100];
+	int nb=0;
 
 	while(node != NULL){
-		if(node->kind==KIND_CMD_SIMPLE){
-			switch(node->u.cmd){
-				case(CMD_FORWARD):
-					ctx->x += node->children[0]->u.value*sin(ctx->angle);
-					ctx->y -= node->children[0]->u.value*cos(ctx->angle);
-					printf("LineTo %f %f\n",ctx->x,ctx->y);
-					break;
+		switch(node->kind){
+			case KIND_CMD_SIMPLE:
+				ast_cmd_eval(node,ctx);
+			break;
 
-				case(CMD_BACKWARD):
-					ctx->x -= node->children[0]->u.value*sin(ctx->angle);
-					ctx->y += node->children[0]->u.value*cos(ctx->angle);
-					printf("LineTo %f %f\n",ctx->x,ctx->y);
-					break;
+			case KIND_CMD_REPEAT:
+				nb = floor(node->children[0]->u.value);
+				for(int i =0; i<nb; i++){
+					ast_cmd_eval(node->children[1],ctx);
+				}
+			break;
 
-				case(CMD_POSITION):
-					ctx->x = node->children[0]->u.value;
-					ctx->y = node->children[1]->u.value;
-					printf("MoveTo %f %f\n",ctx->x,ctx->y);
-					break;
+			default:
+			break;
 
-				case(CMD_RIGHT):
-					ctx->angle += (node->children[0]->u.value/180)*PI;
-					break;
-
-				case(CMD_LEFT):
-					ctx->angle -= (node->children[0]->u.value/180)*PI;
-					break;
-
-				case(CMD_HEADING):
-					ctx->angle = (node->children[0]->u.value/180)*PI;
-					break;
-
-				case(CMD_UP):
-					ctx->up = true;
-					break;
-
-				case(CMD_DOWN):
-					ctx->up = false;
-					break;
-
-				case(CMD_PRINT):
-
-					break;
-
-				case(CMD_COLOR):
-					// printf("COLOR TEST %s\n", node->children[0]->u.name);
-					strcpy(str1, node->children[0]->u.name);
-					// printf("TEST COLOR %s\n", str1);
-					if((strcmp(str1,"red")==0)){
-						printf("Color 1.000000 0.000000 0.000000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"green")==0){
-						printf("Color 0.000000 1.000000 0.000000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"blue")==0){
-						printf("Color 0.000000 0.000000 1.000000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"black")==0){
-						printf("Color 0.000000 0.000000 0.000000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"gray")==0){
-						printf("Color 0.500000 0.500000 0.500000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"cyan")==0){
-						printf("Color 0.000000 1.000000 1.000000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"yellow")==0){
-						printf("Color 1.000000 0.000000 1.000000\n");
-					}
-					else if(strcmp(node->children[0]->u.name,"magenta")==0){
-						printf("Color 1.000000 1.000000 0.000000\n");
-					}
-					else{
-						printf("Long: %lu\n", strlen(node->children[0]->u.name));
-						printf("RED FAIL because:%s \n", node->children[0]->u.name);
-					}
-					break;
-
-				default:
-					break;
-			}
 		}
 		node=node->next;
 	}
 }
+
+void ast_cmd_eval(struct ast_node *node, struct context *ctx){
+	char str1[100];
+	switch(node->u.cmd){
+		case(CMD_FORWARD):
+			ctx->x += node->children[0]->u.value*sin(ctx->angle);
+			ctx->y -= node->children[0]->u.value*cos(ctx->angle);
+			printf("LineTo %f %f\n",ctx->x,ctx->y);
+			break;
+
+		case(CMD_BACKWARD):
+			ctx->x -= node->children[0]->u.value*sin(ctx->angle);
+			ctx->y += node->children[0]->u.value*cos(ctx->angle);
+			printf("LineTo %f %f\n",ctx->x,ctx->y);
+			break;
+
+		case(CMD_POSITION):
+			ctx->x = node->children[0]->u.value;
+			ctx->y = node->children[1]->u.value;
+			printf("MoveTo %f %f\n",ctx->x,ctx->y);
+			break;
+
+		case(CMD_RIGHT):
+			ctx->angle += (node->children[0]->u.value/180)*PI;
+			break;
+
+		case(CMD_LEFT):
+			ctx->angle -= (node->children[0]->u.value/180)*PI;
+			break;
+
+		case(CMD_HEADING):
+			ctx->angle = (node->children[0]->u.value/180)*PI;
+			break;
+
+		case(CMD_UP):
+			ctx->up = true;
+			break;
+
+		case(CMD_DOWN):
+			ctx->up = false;
+			break;
+
+		case(CMD_PRINT):
+			break;
+
+		case(CMD_COLOR):
+			// printf("COLOR TEST %s\n", node->children[0]->u.name);
+			strcpy(str1, node->children[0]->u.name);
+			// printf("TEST COLOR %s\n", str1);
+			if((strcmp(str1,"red")==0)){
+				printf("Color 1.000000 0.000000 0.000000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"green")==0){
+				printf("Color 0.000000 1.000000 0.000000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"blue")==0){
+				printf("Color 0.000000 0.000000 1.000000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"black")==0){
+				printf("Color 0.000000 0.000000 0.000000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"gray")==0){
+				printf("Color 0.500000 0.500000 0.500000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"cyan")==0){
+				printf("Color 0.000000 1.000000 1.000000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"yellow")==0){
+				printf("Color 1.000000 0.000000 1.000000\n");
+			}
+			else if(strcmp(node->children[0]->u.name,"magenta")==0){
+				printf("Color 1.000000 1.000000 0.000000\n");
+			}
+			else{
+				printf("Long: %lu\n", strlen(node->children[0]->u.name));
+				printf("RED FAIL because:%s \n", node->children[0]->u.name);
+			}
+			break;
+
+		default:
+		break;
+	}
+}
+
+
+
+
 
 /*
  * print
