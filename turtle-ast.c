@@ -39,6 +39,7 @@ struct ast_node *make_expr_value(double value) {
 	struct ast_node *node = calloc(1, sizeof(struct ast_node));
 	node->kind = KIND_EXPR_VALUE;
 	node->u.value = value;
+	node->next = NULL;
 	return node;
 }
 
@@ -57,6 +58,7 @@ struct ast_node *make_expr_name(const char* name) {
 		my_map[position] = *temp;
 		position++;
 	}
+	node->next = NULL;
 	return node;
 }
 
@@ -67,6 +69,7 @@ struct ast_node *make_expr_operateur(const char op, struct ast_node *left, struc
 	node->children_count = 2;
 	node->children[0]=left;
 	node->children[1]=right;
+	node->next = NULL;
 	return node;
 }
 
@@ -76,6 +79,7 @@ struct ast_node *make_expr_operateur_oppose(struct ast_node *expr){
 	node->u.op = '_';
 	node->children_count = 1;
 	node->children[0]=expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -86,6 +90,7 @@ struct ast_node *make_expr_func_sin(struct ast_node *expr){
 	node->u.func = FUNC_SIN;
 	node->children_count = 1;
 	node->children[0]=expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -95,6 +100,7 @@ struct ast_node *make_expr_func_cos(struct ast_node *expr){
 	node->u.func = FUNC_COS;
 	node->children_count = 1;
 	node->children[0]=expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -104,6 +110,7 @@ struct ast_node *make_expr_func_tan(struct ast_node *expr){
 	node->u.func = FUNC_TAN;
 	node->children_count = 1;
 	node->children[0]=expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -113,6 +120,7 @@ struct ast_node *make_expr_func_sqrt(struct ast_node *expr){
 	node->u.func = FUNC_SQRT;
 	node->children_count = 1;
 	node->children[0]=expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -123,6 +131,7 @@ struct ast_node *make_expr_func_random(struct ast_node *min, struct ast_node *ma
 	node->children_count = 2;
 	node->children[0]=min;
 	node->children[1]=max;
+	node->next = NULL;
 	return node;
 }
 
@@ -133,6 +142,7 @@ struct ast_node *make_cmd_forward(struct ast_node *expr) {
 	node->u.cmd = CMD_FORWARD;
 	node->children_count = 1;
 	node->children[0] = expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -142,6 +152,7 @@ struct ast_node *make_cmd_backward(struct ast_node *expr) {
 	node->u.cmd = CMD_BACKWARD;
 	node->children_count = 1;
 	node->children[0] = expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -153,6 +164,7 @@ struct ast_node *make_cmd_position(struct ast_node *x, struct ast_node *y){
 	node->children_count = 2;
 	node->children[0] = x;
 	node->children[1] = y;
+	node->next = NULL;
 	return node;
 }
 
@@ -163,6 +175,7 @@ struct ast_node *make_cmd_right(struct ast_node *expr) {
 	node->u.cmd = CMD_RIGHT;
 	node->children_count = 1;
 	node->children[0] = expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -172,6 +185,7 @@ struct ast_node *make_cmd_left(struct ast_node *expr) {
 	node->u.cmd = CMD_LEFT;
 	node->children_count = 1;
 	node->children[0] = expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -181,6 +195,7 @@ struct ast_node *make_cmd_heading(struct ast_node *expr) {
 	node->u.cmd = CMD_HEADING;
 	node->children_count = 1;
 	node->children[0] = expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -189,6 +204,7 @@ struct ast_node *make_cmd_up() {
 	node->kind = KIND_CMD_SIMPLE;
 	node->u.cmd = CMD_UP;
 	node->children_count = 0;
+	node->next = NULL;
 	return node;
 }
 
@@ -197,6 +213,7 @@ struct ast_node *make_cmd_down() {
 	node->kind = KIND_CMD_SIMPLE;
 	node->u.cmd = CMD_DOWN;
 	node->children_count = 0;
+	node->next = NULL;
 	return node;
 }
 
@@ -206,6 +223,7 @@ struct ast_node *make_cmd_print(struct ast_node *expr) {
 	node->u.cmd = CMD_PRINT;
 	node->children_count = 1;
 	node->children[0] = expr;
+	node->next = NULL;
 	return node;
 }
 
@@ -218,6 +236,7 @@ struct ast_node *make_cmd_color(struct ast_node *expr1, struct ast_node *expr2, 
 	node->children[0] = expr1;
 	node->children[1] = expr2;
 	node->children[2] = expr3;
+	node->next = NULL;
 	return node;
 }
 
@@ -227,6 +246,7 @@ struct ast_node *make_cmd_repeat(struct ast_node *number, struct ast_node *cmd){
 	node->children_count = 2;
 	node->children[0]=number;
 	node->children[1]=cmd;
+	node->next = NULL;
 	return node;
 }
 
