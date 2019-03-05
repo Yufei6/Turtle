@@ -11,6 +11,8 @@
 #define SQRT2 1.41421356237309504880
 #define SQRT3 1.7320508075688772935
 
+
+//structure pour enregistrer les variables
 struct shine{
 	const char* name;
 	double value;
@@ -279,10 +281,8 @@ struct ast_node *make_cmd_set(struct ast_node *name, struct ast_node *expr){
 
 void ast_destroy(struct ast *self) {
 	if (self==NULL) {
+		free(my_map);
 	    return;
-	}
-	if (self->unit == NULL) {
-	    free(self);
 	}
 	struct ast_node *curr = self->unit;
 	while (curr->next != NULL) {
@@ -291,7 +291,7 @@ void ast_destroy(struct ast *self) {
 	    free(temp);
 	}
 	free(self->unit);
-	free(self);
+	free(my_map);
 }
 
 /*
