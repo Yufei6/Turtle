@@ -1,6 +1,5 @@
 #ifndef TURTLE_AST_H
 #define TURTLE_AST_H
-
 #include <stddef.h>
 #include <stdbool.h>
 
@@ -25,6 +24,7 @@ enum ast_func {
   FUNC_RANDOM,
   FUNC_SIN,
   FUNC_SQRT,
+  FUNC_TAN,
 };
 
 // kind of a node in the abstract syntax tree
@@ -68,6 +68,7 @@ struct ast_node {
 struct ast_node *make_expr_value(double value);
 struct ast_node *make_expr_name(const char *name);
 struct ast_node *make_expr_operateur(const char op, struct ast_node *left, struct ast_node *right);
+struct ast_node *make_expr_operateur_oppose(struct ast_node *expr);
 struct ast_node *make_cmd_forward(struct ast_node *expr);
 struct ast_node *make_cmd_backward(struct ast_node *expr);
 struct ast_node *make_cmd_position(struct ast_node *x, struct ast_node *y);
@@ -81,6 +82,12 @@ struct ast_node *make_cmd_color(struct ast_node *expr1,struct ast_node *expr2,st
 struct ast_node *make_cmd_repeat(struct ast_node *number, struct ast_node *cmd);
 struct ast_node *make_cmd_block(struct ast_node *cmds_in_block);
 struct ast_node *make_cmd_set(struct ast_node *name, struct ast_node *expr);
+struct ast_node *make_expr_func_sin(struct ast_node *expr);
+struct ast_node *make_expr_func_cos(struct ast_node *expr);
+struct ast_node *make_expr_func_tan(struct ast_node *expr);
+struct ast_node *make_expr_func_sqrt(struct ast_node *expr);
+struct ast_node *make_expr_func_random(struct ast_node *min, struct ast_node *max);
+
 
 
 

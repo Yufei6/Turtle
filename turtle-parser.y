@@ -49,12 +49,29 @@ void yyerror(struct ast *ret, const char *);
 %token      KW_REPEAT  "repeat"
 %token      LP          "lp"
 %token      RP          "rp"
+%token      SIN         "sin"
+%token      COS         "cos"
+%token      TAN         "tan"
+%token      SQRT        "sqrt"
+%token      RANDOM      "random"
+%token      LL          "ll"
+%token      RR          "rr"
+%token      COMMA       "comma"
+%token      ADD       "add"
+%token      SUB       "sub"
+%token      DIV       "div"
+%token      MUL       "mul"
+%token      PUI       "pui"
+%token      OPPOSE    "oppose"
 %token		  QUIT	"quit"
 /* TODO: add other tokens */
 
-%left '+' '-'
-%left '*' '/'
-%left '^'
+%left OPPOSE
+%left ADD SUB
+%left MUL DIV
+%left PUI
+%left SIN COS TAN SQRT RANDOM
+
 
 %type <node> unit cmds cmd expr
 
@@ -81,7 +98,7 @@ cmd:
     |KW_UP {$$ = make_cmd_up(); insert_node(ret, $$);}
     |KW_DOWN {$$ = make_cmd_down(); insert_node(ret, $$);}
     |KW_PRINT expr{$$ = make_cmd_print($2); insert_node(ret,$$);}
-    |KW_SET NAME expr{$$ = make_cmd_set(make_expr_name($2),$3); insert_node(ret,$$);}
+    |KW_SET expr expr{$$ = make_cmd_set($2,$3); insert_node(ret,$$);}
     |KW_COLOR RED{$$ = make_cmd_color(make_expr_value(1),make_expr_value(0),make_expr_value(0)); insert_node(ret,$$);}
     |KW_COLOR GREEN{$$ = make_cmd_color(make_expr_value(0),make_expr_value(1),make_expr_value(0)); insert_node(ret,$$);}
     |KW_COLOR BLUE{$$ = make_cmd_color(make_expr_value(0),make_expr_value(0),make_expr_value(1)); insert_node(ret,$$);}
@@ -94,18 +111,28 @@ cmd:
     |KW_REPEAT expr cmd{$$ = make_cmd_repeat($2,$3); insert_node(ret,$$);}
     |LP cmds RP{$$ = make_cmd_block($2); insert_node(ret,$$);}
     |QUIT { fprintf(stderr, "byebye"); }
+    |NAME { $$ = make_expr_name($1); }
 ;
 
 expr:
     VALUE             { $$ = make_expr_value($1); }
+  | LL expr RR        { $$ = $2; }
   | NAME              { $$ = make_expr_name($1); }
-  | expr '+' expr { $$ = make_expr_operateur('+',$1,$3); }
-  | expr '-' expr { $$ = make_expr_operateur('-',$1,$3); }
-  | expr '*' expr { $$ = make_expr_operateur('*',$1,$3); }
-  | expr '/' expr { $$ = make_expr_operateur('/',$1,$3); }
-  | expr '^' expr { $$ = make_expr_operateur('^',$1,$3); }
+  | OPPOSE expr      { $$ = make_expr_operateur_oppose($2); }
+  | expr ADD expr { $$ = make_expr_operateur('+',$1,$3); }
+  | expr SUB expr { $$ = make_expr_operateur('-',$1,$3); }
+  | expr MUL expr { $$ = make_expr_operateur('*',$1,$3); }
+  | expr DIV expr { $$ = make_expr_operateur('/',$1,$3); }
+  | expr PUI expr { $$ = make_expr_operateur('^',$1,$3); }
+  | SIN expr      { $$ = make_expr_func_sin($2); }
+  | COS expr      { $$ = make_expr_func_cos($2); }
+  | TAN expr      { $$ = make_expr_func_tan($2); }
+  | SQRT expr     { $$ = make_expr_func_sqrt($2); }
+  | RANDOM LL expr COMMA expr RR    { $$ = make_expr_func_random($3,$5); }
+
   
 ;
+
 
   
 

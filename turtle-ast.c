@@ -11,6 +11,30 @@
 #define SQRT2 1.41421356237309504880
 #define SQRT3 1.7320508075688772935
 
+struct shine{
+	const char* name;
+	double value;
+};
+
+struct shine* my_map = NULL;
+int position = 0;
+
+void init_map(){
+	my_map = malloc(20*sizeof(struct shine));
+}
+
+
+
+
+bool map_has_this_name(const char* name){
+	for(int i=0; i<position; i++){
+		if(strcmp(my_map[i].name, name)==0){
+			return true;
+		}
+	}
+	return false;
+}
+
 struct ast_node *make_expr_value(double value) {
 	struct ast_node *node = calloc(1, sizeof(struct ast_node));
 	node->kind = KIND_EXPR_VALUE;
@@ -23,6 +47,16 @@ struct ast_node *make_expr_name(const char* name) {
 	node->kind = KIND_EXPR_NAME;
 	node->u.name = name;
 	node->children_count = 0;
+	if(my_map==NULL){
+		init_map();
+	}
+	if(!map_has_this_name(name)){
+		struct shine *temp= malloc(sizeof(struct shine));
+		temp->name = name;
+		temp->value = 0;
+		my_map[position] = *temp;
+		position++;
+	}
 	return node;
 }
 
@@ -36,7 +70,61 @@ struct ast_node *make_expr_operateur(const char op, struct ast_node *left, struc
 	return node;
 }
 
+struct ast_node *make_expr_operateur_oppose(struct ast_node *expr){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_BINOP;
+	node->u.op = '_';
+	node->children_count = 1;
+	node->children[0]=expr;
+	return node;
+}
 
+
+struct ast_node *make_expr_func_sin(struct ast_node *expr){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_FUNC;
+	node->u.func = FUNC_SIN;
+	node->children_count = 1;
+	node->children[0]=expr;
+	return node;
+}
+
+struct ast_node *make_expr_func_cos(struct ast_node *expr){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_FUNC;
+	node->u.func = FUNC_COS;
+	node->children_count = 1;
+	node->children[0]=expr;
+	return node;
+}
+
+struct ast_node *make_expr_func_tan(struct ast_node *expr){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_FUNC;
+	node->u.func = FUNC_TAN;
+	node->children_count = 1;
+	node->children[0]=expr;
+	return node;
+}
+
+struct ast_node *make_expr_func_sqrt(struct ast_node *expr){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_FUNC;
+	node->u.func = FUNC_SQRT;
+	node->children_count = 1;
+	node->children[0]=expr;
+	return node;
+}
+
+struct ast_node *make_expr_func_random(struct ast_node *min, struct ast_node *max){
+	struct ast_node *node = calloc(1, sizeof(struct ast_node));
+	node->kind = KIND_EXPR_FUNC;
+	node->u.func = FUNC_RANDOM;
+	node->children_count = 2;
+	node->children[0]=min;
+	node->children[1]=max;
+	return node;
+}
 
 
 struct ast_node *make_cmd_forward(struct ast_node *expr) {
@@ -170,12 +258,20 @@ struct ast_node *make_cmd_set(struct ast_node *name, struct ast_node *expr){
 
 
 void ast_destroy(struct ast *self) {
-	// while(self->unit!=NULL){
-	// 	struct ast_node *temp = self->unit->next;
-	// 	free(self->unit);
-	// 	self->unit = temp;
-	// }
-	// free(self);
+	if (self==NULL) {
+	    return;
+	}
+	if (self->unit == NULL) {
+	    free(self);
+	}
+	struct ast_node *curr = self->unit;
+	while (curr->next != NULL) {
+	    struct ast_node *temp = curr->next;
+	    curr->next = curr->next->next;
+	    free(temp);
+	}
+	free(self->unit);
+	free(self);
 }
 
 /*
@@ -189,6 +285,101 @@ void context_create(struct context *self) {
 	self->angle = 0.0;
 	self->up = true;
 }
+
+void ast_name_eval(struct ast_node *node){
+	for(int i=0; i<position; i++){
+		if(strcmp(my_map[i].name , node->u.name)==0){
+			node->u.value=my_map[i].value;
+			break;
+		}
+	}
+}
+
+
+
+
+void ast_binop_eval(struct ast_node *node){
+	if(node->children[0]->kind==KIND_EXPR_BINOP){
+		ast_binop_eval(node->children[0]);
+	}
+	if(node->children[0]->kind==KIND_EXPR_NAME){
+		ast_name_eval(node->children[0]);
+	}
+	if(node->children[1]->kind==KIND_EXPR_BINOP){
+		ast_binop_eval(node->children[1]);
+	}
+	if(node->children[1]->kind==KIND_EXPR_NAME){
+			ast_name_eval(node->children[1]);
+	}
+	switch(node->u.op){
+		case '+':
+			node->u.value=node->children[0]->u.value + node->children[1]->u.value;
+		break;
+		case '-':
+			node->u.value=node->children[0]->u.value - node->children[1]->u.value;
+		break;
+		case '*':
+			node->u.value=node->children[0]->u.value * node->children[1]->u.value;
+		break;
+		case '/':
+			node->u.value=node->children[0]->u.value / node->children[1]->u.value;
+		break;
+		case '^':
+			node->u.value=pow(node->children[0]->u.value,node->children[1]->u.value);
+		break;
+		case '_':
+			if(node->children[0]->kind==KIND_EXPR_BINOP){
+				ast_binop_eval(node->children[0]);
+			}
+			node->u.value=-node->children[0]->u.value;
+		default:
+		break;
+	}
+}
+
+
+
+void translete_expr_2_value(struct ast_node *node){
+	for(int i=0; i<node->children_count;i++){
+		if(node->children[i]->kind==KIND_EXPR_BINOP){
+			ast_binop_eval(node->children[i]);
+		}
+		else if(node->children[i]->kind==KIND_EXPR_NAME){
+			ast_name_eval(node->children[i]);
+		}
+	}
+}
+
+void ast_func_eval(struct ast_node *node){
+	switch(node->u.func){
+		case FUNC_SIN:
+			node->u.value=sin(node->children[0]->u.value);
+		break;
+
+		case FUNC_COS:
+			node->u.value=cos(node->children[0]->u.value);
+		break;
+
+		case FUNC_TAN:
+			if(cos(node->children[0]->u.value)!=0){
+				node->u.value=sin(node->children[0]->u.value) / cos(node->children[0]->u.value);
+			}
+			else{
+				printf("You cant calcul tan with that!\n");
+			}
+		break;
+
+		case FUNC_SQRT:
+			node->u.value=sqrt(node->children[0]->u.value);
+		break;
+
+		case FUNC_RANDOM:
+			node->u.value=random() * node->children[1]->u.value + node->children[0]->u.value;
+		break;
+	}
+}
+
+
 
 /*
  * eval
@@ -232,8 +423,27 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 				ast_binop_eval(node);
 			break;
 
-			case  KIND_EXPR_NAME:
-				
+			case  KIND_CMD_SET:
+				if(node->children[1]->kind==KIND_EXPR_BINOP){
+					ast_binop_eval(node->children[1]);
+				}
+				if(map_has_this_name(node->children[0]->u.name)){
+					for(int i=0;i<position;i++){
+						if(strcmp(my_map[i].name ,node->children[0]->u.name)==0){
+							my_map[i].value = node->children[1]->u.value;
+						}
+					}
+				}
+				else{
+					printf("This variable '%s' has no defined!\n",node->children[0]->u.name);
+				}
+			break;
+
+			case KIND_EXPR_FUNC:
+				for(int i=0;i<node->children_count;i++){
+					translete_expr_2_value(node->children[i]);
+				}
+				ast_func_eval(node);
 			break;
 
 			default:
@@ -244,35 +454,12 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 	}
 }
 
-void ast_binop_eval(struct ast_node *node){
-	switch(node->u.op){
-		case '+':
-			node->u.value=node->children[0]->u.value + node->children[1]->u.value;
-		break;
-		case '-':
-			node->u.value=node->children[0]->u.value - node->children[1]->u.value;
-		break;
-		case '*':
-			node->u.value=node->children[0]->u.value * node->children[1]->u.value;
-		break;
-		case '/':
-			node->u.value=node->children[0]->u.value / node->children[1]->u.value;
-		break;
-		case '^':
-			node->u.value=pow(node->children[0]->u.value,node->children[1]->u.value);
-		break;
-		default:
-			printf("I WORK FOR NOTHING\n");
-		break;
-	}
-}
+
 
 void ast_cmd_eval(struct ast_node *node, struct context *ctx){
+	translete_expr_2_value(node);
 	switch(node->u.cmd){
 		case(CMD_FORWARD):
-			if(node->children[0]->kind==KIND_EXPR_BINOP){
-				ast_binop_eval(node->children[0]);
-			}
 			ctx->x += node->children[0]->u.value*sin(ctx->angle*PI/180);
 			ctx->y -= node->children[0]->u.value*cos(ctx->angle*PI/180);
 			printf("LineTo %f %f\n",ctx->x,ctx->y);
@@ -319,6 +506,7 @@ void ast_cmd_eval(struct ast_node *node, struct context *ctx){
 		break;
 	}
 }
+
 
 
 
