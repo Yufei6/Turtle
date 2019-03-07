@@ -300,10 +300,10 @@ void ast_destroy(struct ast *self) {
 
 void context_create(struct context *self) {
 	self = calloc(1, sizeof(struct context));
+	self->up = false;
 	self->x = 0.0;
 	self->y = 0.0;
 	self->angle = 0.0;
-	self->up = true;
 }
 
 void ast_name_eval(struct ast_node *node){
@@ -482,13 +482,23 @@ void ast_cmd_eval(struct ast_node *node, struct context *ctx){
 		case(CMD_FORWARD):
 			ctx->x += node->children[0]->u.value*sin(ctx->angle*PI/180);
 			ctx->y -= node->children[0]->u.value*cos(ctx->angle*PI/180);
-			printf("LineTo %f %f\n",ctx->x,ctx->y);
+			if(ctx->up==true){
+				printf("MoveTo %f %f\n",ctx->x,ctx->y);
+			}
+			else{
+				printf("LineTo %f %f\n",ctx->x,ctx->y);
+			}
 			break;
 
 		case(CMD_BACKWARD):
 			ctx->x -= node->children[0]->u.value*sin(ctx->angle*PI/180);
 			ctx->y += node->children[0]->u.value*cos(ctx->angle*PI/180);
-			printf("LineTo %f %f\n",ctx->x,ctx->y);
+			if(ctx->up==true){
+				printf("MoveTo %f %f\n",ctx->x,ctx->y);
+			}
+			else{
+				printf("LineTo %f %f\n",ctx->x,ctx->y);
+			}
 			break;
 
 		case(CMD_POSITION):
@@ -540,6 +550,36 @@ char* print_kind(enum ast_kind kind) {
 	switch(kind) {
 		case KIND_CMD_SIMPLE:
 			return "KIND_CMD_SIMPLE";
+			break;
+		case KIND_CMD_REPEAT:
+			return "KIND_CMD_REPEAT";
+			break;
+		case KIND_CMD_BLOCK:
+			return "KIND_CMD_BLOCK";
+			break;
+		case KIND_CMD_PROC:
+			return "KIND_CMD_PROC";
+			break;
+		case KIND_CMD_CALL:
+			return "KIND_CMD_CALL";
+			break;
+		case KIND_CMD_SET:
+			return "KIND_CMD_SET";
+			break;
+		case KIND_EXPR_FUNC:
+			return "KIND_EXPR_FUNC";
+			break;
+		case KIND_EXPR_VALUE:
+			return "KIND_EXPR_VALUE";
+			break;
+		case KIND_EXPR_BINOP:
+			return "KIND_EXPR_BINOP";
+			break;
+		case KIND_EXPR_BLOCK:
+			return "KIND_EXPR_BLOCK";
+			break;
+		case KIND_EXPR_NAME:
+			return "KIND_EXPR_NAME";
 			break;
 		default:
 			return "INKNOW STILL";
@@ -594,7 +634,12 @@ void ast_print(const struct ast *self) {
 	}
 	struct ast_node *current_node = self->unit;
 	do {
-		printf("[Node: %s & %s] -> ", print_kind(current_node->kind), print_kind_cmd(current_node->u.cmd));
+		if(current_node->kind==KIND_CMD_SIMPLE){
+			printf("[Node: KIND_CMD_SIMPLE & %s] -> ", print_kind_cmd(current_node->u.cmd));
+		}
+		else{
+			printf("[Node: %s ] -> ", print_kind(current_node->kind));
+		}
 		current_node = current_node->next;
 	} while (current_node != NULL);
 	printf("...\n");
