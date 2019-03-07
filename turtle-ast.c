@@ -63,6 +63,9 @@ struct ast_node *make_expr_name(const char* name) {
 	node->kind = KIND_EXPR_NAME;
 	node->u.name = name;
 	node->children_count = 0;
+	if(my_map==NULL){
+		init_map();
+	}
 	if(!map_has_this_name(name)){
 		struct shine *temp= malloc(sizeof(struct shine));
 		temp->name = name;

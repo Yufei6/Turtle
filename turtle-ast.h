@@ -122,6 +122,6 @@ void ast_print(const struct ast *self);
 void ast_eval(const struct ast *self, struct context *ctx);
 void ast_cmd_eval(struct ast_node *node, struct context *ctx);
 void ast_binop_eval(struct ast_node *node);
-void init_map();
+
 
 #endif /* TURTLE_AST_H */
