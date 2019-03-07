@@ -48,8 +48,8 @@ heading|hd           { return KW_HEADING; }
 "magenta"				  { return MAGENTA; }
 "{"			  		  { return LP; }
 "}"					  { return RP; }
-")"              	  { return LL; }
-"("              	  { return RR; }
+")"              	  { return *yytext; }
+"("              	  { return *yytext; }
 ","					  { return COMMA; }
 
 repeat                { return KW_REPEAT; }

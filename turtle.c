@@ -19,6 +19,7 @@ int main() {
 
   yylex_destroy();
 
+  init_map();
   assert(root.unit);
 
   struct context ctx;

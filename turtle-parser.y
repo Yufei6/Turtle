@@ -35,35 +35,35 @@ void yyerror(struct ast *ret, const char *);
 %token      YELLOW 
 %token      MAGENTA 
 
-%token      KW_SET     "set"
-%token      KW_FORWARD  "forward"
-%token      KW_BACKWARD  "backward"
-%token      KW_POSITION  "position"
-%token      KW_RIGHT  "right"
-%token      KW_LEFT  "left"
-%token      KW_HEADING  "heading"
-%token      KW_UP  "up"
-%token      KW_DOWN  "down"
-%token      KW_PRINT  "print"
-%token      KW_COLOR  "color"
-%token      KW_REPEAT  "repeat"
-%token      LP          "lp"
-%token      RP          "rp"
-%token      SIN         "sin"
-%token      COS         "cos"
-%token      TAN         "tan"
-%token      SQRT        "sqrt"
-%token      RANDOM      "random"
-%token      LL          "ll"
-%token      RR          "rr"
-%token      COMMA       "comma"
-%token      ADD       "add"
-%token      SUB       "sub"
-%token      DIV       "div"
-%token      MUL       "mul"
-%token      PUI       "pui"
-%token      OPPOSE    "oppose"
-%token		  QUIT	"quit"
+%token      KW_SET        "set"
+%token      KW_FORWARD    "forward"
+%token      KW_BACKWARD   "backward"
+%token      KW_POSITION   "position"
+%token      KW_RIGHT      "right"
+%token      KW_LEFT       "left"
+%token      KW_HEADING    "heading"
+%token      KW_UP         "up"
+%token      KW_DOWN       "down"
+%token      KW_PRINT      "print"
+%token      KW_COLOR      "color"
+%token      KW_REPEAT     "repeat"
+%token      LP            "lp"
+%token      RP            "rp"
+%token      SIN           "sin"
+%token      COS           "cos"
+%token      TAN           "tan"
+%token      SQRT          "sqrt"
+%token      RANDOM        "random"
+%token      LL            "ll"
+%token      RR            "rr"
+%token      COMMA         "comma"
+%token      ADD           "add"
+%token      SUB           "sub"
+%token      DIV           "div"
+%token      MUL           "mul"
+%token      PUI           "pui"
+%token      OPPOSE        "oppose"
+%token		  QUIT	        "quit"
 /* TODO: add other tokens */
 
 %left OPPOSE
@@ -116,7 +116,7 @@ cmd:
 
 expr:
     VALUE             { $$ = make_expr_value($1); }
-  | LL expr RR        { $$ = $2; }
+  | '(' expr ')'        { $$ = $2; }
   | NAME              { $$ = make_expr_name($1); }
   | OPPOSE expr      { $$ = make_expr_operateur_oppose($2); }
   | expr ADD expr { $$ = make_expr_operateur('+',$1,$3); }
@@ -128,7 +128,7 @@ expr:
   | COS expr      { $$ = make_expr_func_cos($2); }
   | TAN expr      { $$ = make_expr_func_tan($2); }
   | SQRT expr     { $$ = make_expr_func_sqrt($2); }
-  | RANDOM LL expr COMMA expr RR    { $$ = make_expr_func_random($3,$5); }
+  | RANDOM '(' expr COMMA expr ')'   { $$ = make_expr_func_random($3,$5); }
 
   
 ;

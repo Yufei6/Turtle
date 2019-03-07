@@ -8,8 +8,7 @@
 #include <math.h>
 
 #define PI 3.14159265358979323846
-#define SQRT2 1.41421356237309504880
-#define SQRT3 1.7320508075688772935
+
 
 
 //structure pour enregistrer les variables
@@ -22,9 +21,23 @@ struct shine* my_map = NULL;
 int position = 0;
 
 void init_map(){
-	my_map = malloc(20*sizeof(struct shine));
+	my_map = malloc(50*sizeof(struct shine));
+	struct shine *pi= malloc(sizeof(struct shine));
+	pi->name = "PI";
+	pi->value = 3.14159265358979323846;
+	my_map[position] = *pi;
+	position++;
+	struct shine *sqrt2= malloc(sizeof(struct shine));
+	sqrt2->name = "SQRT2";
+	sqrt2->value = 1.41421356237309504880;
+	my_map[position] = *sqrt2;
+	position++;
+	struct shine *sqrt3= malloc(sizeof(struct shine));
+	sqrt3->name = "SQRT3";
+	sqrt3->value = 1.7320508075688772935;
+	my_map[position] = *sqrt3;
+	position++;
 }
-
 
 
 
@@ -50,9 +63,6 @@ struct ast_node *make_expr_name(const char* name) {
 	node->kind = KIND_EXPR_NAME;
 	node->u.name = name;
 	node->children_count = 0;
-	if(my_map==NULL){
-		init_map();
-	}
 	if(!map_has_this_name(name)){
 		struct shine *temp= malloc(sizeof(struct shine));
 		temp->name = name;
@@ -394,7 +404,7 @@ void ast_func_eval(struct ast_node *node){
 		break;
 
 		case FUNC_RANDOM:
-			node->u.value=random() * node->children[1]->u.value + node->children[0]->u.value;
+			node->u.value=rand()/(RAND_MAX+1.0) * (node->children[1]->u.value - node->children[0]->u.value) + node->children[0]->u.value;
 		break;
 	}
 }
@@ -447,21 +457,28 @@ void ast_eval(const struct ast *self, struct context *ctx) {
 				if(node->children[1]->kind==KIND_EXPR_BINOP){
 					ast_binop_eval(node->children[1]);
 				}
-				if(map_has_this_name(node->children[0]->u.name)){
+				else if(node->children[1]->kind == KIND_EXPR_FUNC){
+					ast_func_eval(node->children[1]);
+				}
+				if(!map_has_this_name(node->children[0]->u.name)){
+					struct shine *temp= malloc(sizeof(struct shine));
+					temp->name = node->children[0]->u.name;
+					temp->value = node->children[1]->u.value;
+					my_map[position] = *temp;
+					position++;
+				}
+				else{
 					for(int i=0;i<position;i++){
 						if(strcmp(my_map[i].name ,node->children[0]->u.name)==0){
 							my_map[i].value = node->children[1]->u.value;
 						}
 					}
 				}
-				else{
-					printf("This variable '%s' has no defined!\n",node->children[0]->u.name);
-				}
 			break;
 
 			case KIND_EXPR_FUNC:
 				for(int i=0;i<node->children_count;i++){
-					translete_expr_2_value(node->children[i]);
+					
 				}
 				ast_func_eval(node);
 			break;
@@ -626,7 +643,7 @@ char* print_kind_cmd(enum ast_cmd kind_cmd){
 
 void ast_print(const struct ast *self) {
 	if (self != NULL) {
-		printf("[root] -> ");
+		printf("\n\n\n[root] -> ");
 	}
 	if (self->unit == NULL) {
 		printf("...\n");
@@ -635,10 +652,10 @@ void ast_print(const struct ast *self) {
 	struct ast_node *current_node = self->unit;
 	do {
 		if(current_node->kind==KIND_CMD_SIMPLE){
-			printf("[Node: KIND_CMD_SIMPLE & %s] -> ", print_kind_cmd(current_node->u.cmd));
+			printf("[Node: KIND_CMD_SIMPLE & %s] -> \n", print_kind_cmd(current_node->u.cmd));
 		}
 		else{
-			printf("[Node: %s ] -> ", print_kind(current_node->kind));
+			printf("[Node: %s ] -> \n", print_kind(current_node->kind));
 		}
 		current_node = current_node->next;
 	} while (current_node != NULL);
