@@ -8,6 +8,7 @@
 #include <math.h>
 
 #define PI 3.14159265358979323846
+#define NB_VARIABLE_MAX 50
 
 
 
@@ -21,7 +22,7 @@ struct shine* my_map = NULL;
 int position = 0;
 
 void init_map(){
-	my_map = malloc(50*sizeof(struct shine));
+	my_map = malloc(NB_VARIABLE_MAX*sizeof(struct shine));
 	struct shine *pi= malloc(sizeof(struct shine));
 	pi->name = "PI";
 	pi->value = 3.14159265358979323846;
